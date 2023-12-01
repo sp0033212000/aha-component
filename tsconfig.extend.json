@@ -1,0 +1,46 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "@components/*": [
+        "src/components/*"
+      ],
+      "@common/*": [
+        "src/components/common/*"
+      ],
+      "@feature/*": [
+        "src/components/feature/*"
+      ],
+      "@layout/*": [
+        "src/components/layout/*"
+      ],
+      "@c-page/*": [
+        "src/components/page/*"
+      ],
+      "@page/*": [
+        "src/page/*"
+      ],
+      "@hooks/*": [
+        "src/hooks/*"
+      ],
+      "@api/*": [
+        "src/api/*"
+      ],
+      "@utils/*": [
+        "src/utils/*"
+      ],
+      "@styles/*": [
+        "src/styles/*"
+      ],
+      "@assets/*": [
+        "src/assets/*"
+      ],
+      "@constants/*": [
+        "src/assets/*"
+      ]
+    }
+  }
+}

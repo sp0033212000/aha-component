@@ -1,0 +1,169 @@
+{
+  "extends": [
+    "airbnb",
+    "prettier",
+    "airbnb-typescript",
+    "airbnb/hooks",
+    "plugin:import/recommended",
+    "plugin:import/typescript"
+  ],
+  "plugins": [
+    "prettier",
+    "import"
+  ],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true
+      }
+    },
+    "import/parsers": {
+      "@typescript-eslint/parser": [
+        ".js",
+        ".ts",
+        ".jsx",
+        ".tsx",
+        "d.ts"
+      ]
+    }
+  },
+  "rules": {
+    "indent": "off",
+    "@typescript-eslint/indent": [
+      "off"
+    ],
+    "prettier/prettier": "error",
+    "no-unused-vars": "warn",
+    "no-console": "off",
+    "consistent-return": "off",
+    "no-void": "off",
+    "func-names": "off",
+    "no-process-exit": "off",
+    "object-shorthand": "off",
+    "class-methods-use-this": "off",
+    "react/prop-types": "off",
+    "react/require-default-props": "off",
+    "react/jsx-props-no-spreading": "off",
+    "react/function-component-definition": "off",
+    "react-hooks/exhaustive-deps": "off",
+    "no-useless-return": "off",
+    "import/prefer-default-export": "off",
+    "import/order": [
+      "error",
+      {
+        "pathGroups": [
+          {
+            "pattern": "react*",
+            "group": "builtin",
+            "position": "before"
+          },
+          {
+            "pattern": "@react*",
+            "group": "external",
+            "position": "before"
+          },
+          {
+            "pattern": "*",
+            "group": "external",
+            "position": "before"
+          },
+          {
+            "pattern": "@/**/*",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "@/types/*",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "@/constants/*",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "@styles/*",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "@api/*",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "@assets/*",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "@configs/*",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "@events/*",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "@hooks/**/*",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "@utils/*",
+            "group": "internal",
+            "position": "before"
+          },
+          {
+            "pattern": "@common/**/*",
+            "group": "internal",
+            "position": "after"
+          },
+          {
+            "pattern": "@feature/**/*",
+            "group": "internal",
+            "position": "after"
+          },
+          {
+            "pattern": "@layout/**/*",
+            "group": "internal",
+            "position": "after"
+          },
+          {
+            "pattern": "@c-page/**/*",
+            "group": "internal",
+            "position": "after"
+          },
+          {
+            "pattern": "@page/**/*",
+            "group": "internal",
+            "position": "after"
+          }
+        ],
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "parent",
+          "sibling",
+          "index"
+        ],
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        },
+        "pathGroupsExcludedImportTypes": [
+          "react",
+          "@react"
+        ]
+      }
+    ]
+  }
+}
