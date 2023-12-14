@@ -49,7 +49,6 @@ const ValidItem: React.FC<
     pattern: RegExp;
   }>
 > = function ({ children, pattern, password }) {
-  console.log(pattern, pattern.test(password), password);
   const isValid = pattern.test(password);
 
   return (

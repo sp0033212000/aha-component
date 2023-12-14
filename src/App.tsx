@@ -2,7 +2,8 @@ import React, { ChangeEventHandler, useCallback, useState } from 'react';
 
 import classNames from 'classnames';
 
-import { DatePicker, PasswordField } from '@common/field';
+import { DatePicker } from '@common/field/DatePicker';
+import { PasswordField } from '@common/field/PasswordField';
 
 const App: React.FC = function () {
   const [password, setPassword] = useState<string>('');

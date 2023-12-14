@@ -1,17 +1,19 @@
 import React, {
   MutableRefObject,
   PropsWithChildren,
-  useEffect,
+  useCallback,
   useMemo,
   useRef,
   useState,
 } from 'react';
+import { useUpdateEffect } from 'react-use';
 
 import classNames from 'classnames';
 
 import { isNotSet, refMerge } from '@/utils';
 
 import useLayoutSettle from '@hooks/useLayoutSettle';
+import { useScrollEvent } from '@hooks/useScrollEvent';
 
 interface Props {
   isOpen: boolean;
@@ -34,28 +36,29 @@ const TailingModal: React.FC<PropsWithChildren<Props>> = function ({
   offset = 20,
 }) {
   const [recalculateTop, setRecalculateTop] = useState<number>(0);
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const triggerRecalculateTop = () => setRecalculateTop((prev) => prev + 1);
-    window.addEventListener('scroll', triggerRecalculateTop);
-
-    if (window.ontouchmove) {
-      window.addEventListener('touchmove', triggerRecalculateTop);
-    }
-
-    return () => {
-      window.removeEventListener('scroll', triggerRecalculateTop);
-
-      if (window.ontouchmove) {
-        window.removeEventListener('touchmove', triggerRecalculateTop);
-      }
-    };
-  }, [isOpen]);
-
-  const isLayoutSettle = useLayoutSettle();
+  const [isTransitionEnd, setIsTransitionEnd] = useState<boolean>(true);
+  const [shouldUnmount, setShouldUnmount] = useState<boolean>(false);
 
   const modalRef = useRef<HTMLDivElement | null>(null);
+
+  useScrollEvent(() => {
+    if (!isOpen) return;
+    setRecalculateTop((prev) => prev + 1);
+  }, [isOpen]);
+
+  useUpdateEffect(() => {
+    setIsTransitionEnd(false);
+  }, [isOpen]);
+
+  useUpdateEffect(() => {
+    if (!isTransitionEnd) {
+      setShouldUnmount(false);
+    } else if (!isOpen) {
+      setShouldUnmount(true);
+    }
+  }, [isTransitionEnd]);
+
+  const isLayoutSettle = useLayoutSettle();
 
   const left = useMemo(() => {
     if (isNotSet(wrapperRef.current)) return 0;
@@ -83,6 +86,10 @@ const TailingModal: React.FC<PropsWithChildren<Props>> = function ({
     return downPosition;
   }, [isOpen, recalculateTop]);
 
+  const onTransitionEnd = useCallback(() => {
+    setIsTransitionEnd(true);
+  }, []);
+
   return (
     <div
       id={id}
@@ -102,8 +109,9 @@ const TailingModal: React.FC<PropsWithChildren<Props>> = function ({
         top,
         ...style,
       }}
+      onTransitionEnd={onTransitionEnd}
     >
-      {children}
+      {shouldUnmount ? null : children}
     </div>
   );
 };

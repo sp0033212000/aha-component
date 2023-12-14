@@ -35,7 +35,15 @@
     "@typescript-eslint/indent": [
       "off"
     ],
-    "import/no-extraneous-dependencies": ["error", {"devDependencies": true}],
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": false,
+        "optionalDependencies": false,
+        "peerDependencies": false,
+        "packageDir": "./"
+      }
+    ],
     "prettier/prettier": "error",
     "no-unused-vars": "warn",
     "no-console": "off",

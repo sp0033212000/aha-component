@@ -1,11 +1,6 @@
 import React, {
-  createContext,
-  Dispatch,
-  MutableRefObject,
   PropsWithChildren,
-  SetStateAction,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -13,26 +8,16 @@ import React, {
 } from 'react';
 
 import classNames from 'classnames';
-import {
-  format,
-  getDay,
-  getDaysInMonth,
-  isSameDay,
-  set as setDate,
-} from 'date-fns';
+import { getDay, getDaysInMonth, isSameDay, set as setDate } from 'date-fns';
 import { chunk } from 'lodash';
-
-import { NOOP } from '@/constants';
-import { isSet } from '@/utils';
 
 import { ArrowLeftIcon, ArrowRightIcon } from '@assets/icons';
 
-import useInteractiveOutsideTargetHandler from '@hooks/useInteractiveOutsideTargetHandler';
-
-import ConditionalFragment from '@common/ConditionalFragment';
-import FieldWrapper from '@common/field/FieldWrapper';
-
-import TailingModal from '@feature/TailingModal';
+import {
+  CalendarContextProps,
+  CalendarContextProvider,
+  useCalendarContext,
+} from '@feature/Calendar/calendar.context';
 
 const DAY_TEXT = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 const MONTH_TEXT_ABBREVIATION = [
@@ -80,143 +65,6 @@ interface DateItem {
   inMonth: boolean;
 }
 
-interface CalendarContextProps {
-  // State
-  currentYearIndex: number;
-  currentMonthIndex: number;
-  currentDate: Date;
-  isYearIndexSelectorOpen: boolean;
-
-  // Action
-  setCurrentYearIndex: Dispatch<SetStateAction<number>>;
-  setCurrentMonthIndex: Dispatch<SetStateAction<number>>;
-  setCurrentDate: Dispatch<SetStateAction<Date>>;
-  setIsYearIndexSelectorOpen: Dispatch<SetStateAction<boolean>>;
-  goToSpecificYearIndex: (yearIndex: number) => void;
-  goToPreviousMonth: () => void;
-  goToNextMonth: () => void;
-  onCancel: () => void;
-  onConfirm: (date: Date) => void;
-}
-
-const CalendarContext = createContext<CalendarContextProps>({
-  // State
-  currentYearIndex: new Date().getFullYear(),
-  currentMonthIndex: new Date().getMonth(),
-  currentDate: new Date(),
-  isYearIndexSelectorOpen: false,
-
-  // Action
-  setCurrentMonthIndex: NOOP,
-  setCurrentYearIndex: NOOP,
-  setCurrentDate: NOOP,
-  setIsYearIndexSelectorOpen: NOOP,
-  goToSpecificYearIndex: NOOP,
-  goToPreviousMonth: NOOP,
-  goToNextMonth: NOOP,
-  onCancel: NOOP,
-  onConfirm: NOOP,
-});
-
-const useCalendarContext = () => useContext(CalendarContext);
-
-interface CalendarContextProviderProps
-  extends Pick<CalendarContextProps, 'onCancel' | 'onConfirm'> {
-  isOpen: boolean;
-  defaultDate: Date | null;
-}
-
-const CalendarContextProvider: React.FC<
-  PropsWithChildren<CalendarContextProviderProps>
-> = function ({ children, onCancel, onConfirm, isOpen, defaultDate }) {
-  const [currentYearIndex, setCurrentYearIndex] = useState<number>(
-    new Date().getFullYear(),
-  );
-  const [currentMonthIndex, setCurrentMonthIndex] = useState<number>(
-    new Date().getMonth(),
-  );
-  const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const [isYearIndexSelectorOpen, setIsYearIndexSelectorOpen] =
-    useState<boolean>(false);
-
-  useEffect(() => {
-    if (isOpen) return;
-    setIsYearIndexSelectorOpen(false);
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    if (defaultDate) {
-      setCurrentYearIndex(defaultDate.getFullYear());
-      setCurrentMonthIndex(defaultDate.getMonth());
-    } else {
-      setCurrentYearIndex(new Date().getFullYear());
-      setCurrentMonthIndex(new Date().getMonth());
-    }
-  }, [isOpen]);
-
-  const goToPreviousMonth = useCallback(() => {
-    setCurrentMonthIndex((previousMonth) => {
-      if (previousMonth === 0) {
-        setCurrentYearIndex((previousYear) => previousYear - 1);
-        return 11;
-      }
-      return previousMonth - 1;
-    });
-  }, []);
-
-  const goToNextMonth = useCallback(() => {
-    setCurrentMonthIndex((previousMonth) => {
-      if (previousMonth === 11) {
-        setCurrentYearIndex((previousYear) => previousYear + 1);
-        return 0;
-      }
-      return previousMonth + 1;
-    });
-  }, []);
-
-  const goToSpecificYearIndex = useCallback(
-    (yearIndex: number) => setCurrentYearIndex(yearIndex),
-    [],
-  );
-
-  const contextValue = useMemo<CalendarContextProps>(
-    () => ({
-      // State
-      currentDate,
-      currentYearIndex,
-      currentMonthIndex,
-      isYearIndexSelectorOpen,
-
-      // Action,
-      setCurrentDate,
-      setCurrentYearIndex,
-      setCurrentMonthIndex,
-      setIsYearIndexSelectorOpen,
-      goToSpecificYearIndex,
-      goToPreviousMonth,
-      goToNextMonth,
-      onCancel,
-      onConfirm,
-    }),
-    [
-      currentYearIndex,
-      currentMonthIndex,
-      currentDate,
-      isYearIndexSelectorOpen,
-      onCancel,
-      onConfirm,
-    ],
-  );
-
-  return (
-    <CalendarContext.Provider value={contextValue}>
-      {children}
-    </CalendarContext.Provider>
-  );
-};
-
 const MonthControlButton: React.FC<PropsWithChildren<ElementProps<'button'>>> =
   function ({ children, className, type = 'button', ...buttonProps }) {
     return (
@@ -249,7 +97,7 @@ const CalendarHeader = () => {
   );
 };
 
-const CalendarController = () => {
+const CalendarMonthControl = () => {
   const {
     currentMonthIndex,
     currentYearIndex,
@@ -277,7 +125,7 @@ const CalendarController = () => {
   );
 };
 
-const CalendarDateController = () => {
+const CalendarDatePicker = () => {
   const { currentYearIndex, currentMonthIndex, currentDate, setCurrentDate } =
     useCalendarContext();
 
@@ -392,7 +240,7 @@ const CalenderFooter = () => {
   );
 };
 
-const CalenderYearController = () => {
+const CalenderYearPicker = () => {
   const { currentYearIndex, setCurrentYearIndex, setIsYearIndexSelectorOpen } =
     useCalendarContext();
 
@@ -481,104 +329,36 @@ const CalenderYearController = () => {
   );
 };
 
-const Calendar: React.FC<{
-  isOpen: boolean;
-  wrapperRef: MutableRefObject<HTMLDivElement | null>;
-  modalRef: MutableRefObject<HTMLDivElement | null>;
-}> = function ({ isOpen, wrapperRef, modalRef }) {
+const CalendarControllerWrapper: React.FC = function () {
   const { isYearIndexSelectorOpen } = useCalendarContext();
 
+  if (isYearIndexSelectorOpen) {
+    return <CalenderYearPicker />;
+  }
   return (
-    <TailingModal
-      id="datepicker-modal"
-      className="w-fit"
-      isOpen={isOpen}
-      wrapperRef={wrapperRef}
-      customRef={modalRef}
-      offset={14}
-    >
-      <div className="text-white">
-        <CalendarHeader />
-        <ConditionalFragment condition={!isYearIndexSelectorOpen}>
-          <CalendarController />
-          <CalendarDateController />
-        </ConditionalFragment>
-        <ConditionalFragment condition={isYearIndexSelectorOpen}>
-          <CalenderYearController />
-        </ConditionalFragment>
-        <CalenderFooter />
-      </div>
-    </TailingModal>
+    <>
+      <CalendarMonthControl />
+      <CalendarDatePicker />
+    </>
   );
 };
 
-interface Props {
-  label?: string;
-  placeholder?: string;
-  value: Date | null;
-  onChange: (date: Date) => void;
-}
-
-export const DatePicker: React.FC<Props> = function ({
-  label,
-  value,
-  placeholder,
-  onChange,
-}) {
-  const [isFocus, setIsFocus] = useState<boolean>(false);
-
-  const fieldRef = useRef<HTMLDivElement | null>(null);
-  const modalRef = useRef<HTMLDivElement | null>(null);
-
-  const closeModal = useCallback(() => {
-    setIsFocus(false);
-  }, []);
-
-  const onConfirm = useCallback((date: Date) => {
-    onChange(date);
-    closeModal();
-  }, []);
-
-  useInteractiveOutsideTargetHandler(fieldRef.current, closeModal, [
-    modalRef.current,
-  ]);
-
-  const hasValue = isSet(value);
-
-  const onFieldClick = useCallback(() => {
-    setIsFocus(true);
-  }, []);
-
+export const Calendar: React.FC<
+  Pick<CalendarContextProps, 'onCancel' | 'onConfirm'> & {
+    defaultDate: Date | null;
+  }
+> = function ({ onCancel, onConfirm, defaultDate }) {
   return (
     <CalendarContextProvider
-      onCancel={closeModal}
+      onCancel={onCancel}
       onConfirm={onConfirm}
-      isOpen={isFocus}
-      defaultDate={value}
+      defaultDate={defaultDate}
     >
-      <FieldWrapper
-        ref={fieldRef}
-        role="presentation"
-        label={label}
-        onClick={onFieldClick}
-        isFocus={isFocus}
-        focusBorderClassName="border-white"
-        className="font-['Ubuntu']"
-      >
-        <p
-          className={classNames('text-base', 'text-white tracking-[0.15px]', {
-            'text-opacity-30': !hasValue,
-          })}
-        >
-          <ConditionalFragment condition={hasValue}>
-            {value && format(value, 'MM/dd/yyyy')}
-          </ConditionalFragment>
-          <ConditionalFragment condition={!hasValue}>
-            {placeholder}
-          </ConditionalFragment>
-        </p>
-      </FieldWrapper>
-      <Calendar isOpen={isFocus} wrapperRef={fieldRef} modalRef={modalRef} />
+      <div className="text-white">
+        <CalendarHeader />
+        <CalendarControllerWrapper />
+        <CalenderFooter />
+      </div>
     </CalendarContextProvider>
   );
 };
